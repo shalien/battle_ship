@@ -1,7 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
-
 #include <stdio.h>
 #include <libc.h>
 #include "board.h"
@@ -44,25 +40,24 @@ BOARD init_board() {
  * 3. A ship
  * 4. A striken ship
  */
-const char line[] = "  +===+===+===+===+===+===+===+===+===+===+",
-        WATER[] = "   |",
-        WATER_S[] = ANSI_COLOR_BLUE " X " ANSI_COLOR_RESET "|",
-        SHIP[] = ANSI_COLOR_GREEN "***" ANSI_COLOR_RESET "|",
-        SHIP_S[] = ANSI_COLOR_RED "XXX" ANSI_COLOR_RESET "|";
+const char
+        WATER[] = " ≈≈≈",
+        WATER_S[] = ANSI_COLOR_BLUE " X " ANSI_COLOR_RESET " ",
+        SHIP[] = ANSI_COLOR_GREEN "±±±" ANSI_COLOR_RESET " ",
+        SHIP_S[] = ANSI_COLOR_RED "﬩﬩﬩" ANSI_COLOR_RESET " ";
 
 
 void display_board(int board[BOARD_SIZE][BOARD_SIZE]) {
     int i, j;
 
-    puts("\n  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10|");
-    puts(line);
+    puts("\n    1   2   3   4   5   6   7   8   9   10 ");
     for (i = 0; i < BOARD_SIZE; i++) {
-        printf("%c |", i + 'A');
+        printf("%c ", i + 'A');
         for (j = 0; j < BOARD_SIZE; j++) {
             if ((int) board[i][j] == C_WATER) { // Water
-                printf("%d", C_WATER);
+                printf("%s", WATER);
             } else if (board[i][j] == C_WATER_S) { // Water Stiken
-                printf("%d", C_WATER_S);
+                printf("%s", WATER_S);
             } else if (// Ship
                     board[i][j] == C_CARRIER ||
                     board[i][j] == C_BATTLESHIP ||
@@ -76,7 +71,6 @@ void display_board(int board[BOARD_SIZE][BOARD_SIZE]) {
             }
         }
         printf("\n");
-        puts(line);
     }
 }
 
@@ -85,21 +79,17 @@ int get_board_score(BOARD board) {
     return board.carrier + board.battleship + board.cruiser + board.submarine + board.destroyer;
 }
 
-BOARD place_ship(BOARD board, char nom[], int size, int val) {
+BOARD place_ship(BOARD board, char name[], int size, int val) {
     int done, error, i;
     POINT point;
-    char pos[4 + 1], // Coordonnées
+    char pos[4+ 1], //  + 1 pour la touche entrée
+     heading[1 + 1],
+     result[5] = {0},
     orientation[10 + 1],
-            reponse;
+            response;
 
     display_board(board.grid);
-    // IF YOU WANT TO DEBUG/TEST THE GAME,
-    // COMMENT FROM HERE
-    printf("Pour placer un bateau, donnez l'adresse de la case de destination, puis\n"
-           "son orientation (h/v). Les batiments seront positionnés sur la droite de\n"
-           "la case donnée pour les placements horizontaux, et vers le base pour les \n"
-           "placements verticaux. Exemple : a10v\n\n");
-    printf("Veuillez placer le %s (%i cases)\n\n", nom, size);
+    printf("Veuillez placer le %s (%i cases)\n\n", name, size);
     do {
         // Re-init vars
         error = 0;
@@ -107,27 +97,37 @@ BOARD place_ship(BOARD board, char nom[], int size, int val) {
         strcpy(orientation, "horizontal");
 
         // Ask for coordinates
-        printf("Position : ");
+        printf("Position (ex: B10) : ");
         scanf("%s", pos);
 
-        point = str_to_point(pos, 1);
+        printf("Orientation (h/v) : ");
+        scanf("%s", heading);
 
-        //		printf("x: %i, y: %i, o: %point\n", point.x, point.y, point.d);
+        char trimmedPos[4];
+        strlcpy(trimmedPos, pos, sizeof(trimmedPos));
+
+        char trimmedHeading[2];
+        strlcpy(trimmedHeading, heading, sizeof(trimmedHeading));
+
+        strlcat(result, trimmedPos, 4);
+        strcat(result, trimmedHeading);
+
+        point = str_to_point(result, 1);
 
         if (point.x < 0 || point.y < 0 || point.x > BOARD_SIZE || point.y > BOARD_SIZE) {
-            puts(" > Mauvaises coordonnées...");
+            puts(" # Position incorrecte...");
             error = 1;
-        } else if (point.state == 'v') {// Vérification placement des bateaux
+        } else if (point.state == 'v') {
             strcpy(orientation, "vertical");
             // Sortie de carte
             if (point.y + size > BOARD_SIZE) {
-                printf(" > Vous ne pouvez pas placer votre bateau ici. Il sortirait de la carte...(y=%i)\n", point.y);
+                printf(" # Position incorrecte. Dépassement de la zone de jeu...(y=%i)\n", point.y);
                 error = 1;
             } else {
                 // Chevauchements
                 for (i = point.y; i < point.y + size; i++) {
                     if (board.grid[i][point.x] != C_WATER) {
-                        puts(" > Il y a déjà un bateau ici...");
+                        puts(" # Position incorrecte, Case occupée...");
                         error = 1;
 
                         break;
@@ -135,13 +135,13 @@ BOARD place_ship(BOARD board, char nom[], int size, int val) {
                 }
             }
         } else if (point.x + size > BOARD_SIZE) {
-            printf(" > Vous ne pouvez pas placer votre bateau ici. Il sortirait de la carte...(x=%i)\n", point.x);
+            printf(" # Position incorrecte. Dépassement de la zone de jeu...(x=%i)\n", point.x);
             error = 1;
         } else {
             // Chevauchements
             for (i = point.x; i < point.x + size; i++) {
                 if (board.grid[point.y][i] != C_WATER) {
-                    puts(" > Il y a déjà un bateau ici...");
+                    puts(" # Position incorrecte, Case occupée...");
                     error = 1;
 
                     break;
@@ -151,9 +151,9 @@ BOARD place_ship(BOARD board, char nom[], int size, int val) {
 
         if (error == 0) {
             getchar();
-            printf("Placement %s en %point:%i. Est-ce correct ? [o/N] ", orientation, point.y + 'a', point.x + 1);
-            reponse = getchar();
-            if (reponse == 'o' || reponse == 'O') {
+            printf(" # Position %s en %c:%i. \n # Est-ce correct ? [o/N] ", orientation, point.y + 'a', point.x + 1);
+            response = getchar();
+            if (response == 'o' || response == 'O') {
                 done = 1;
             }
         }

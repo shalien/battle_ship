@@ -1,7 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
-
 #ifndef BATTLESHIP_BOARD_H
 #define BATTLESHIP_BOARD_H
 
@@ -20,7 +16,7 @@
 #define C_SUBMARINE 40 // Submarine
 #define C_SUBMARINE_S 41 // Submarine hit
 #define C_DESTROYER 50 // Destroyer
-#define C_DESTROYER_T 51 // Destroyer hit
+#define C_DESTROYER_S 51 // Destroyer hit
 
 /*
  * This struct represents the board game of both players
@@ -40,6 +36,6 @@ int get_board_score(BOARD board);
 
 void display_board(int board[BOARD_SIZE][BOARD_SIZE]);
 
-BOARD place_ship(BOARD board, char nom[], int size, int val);
+BOARD place_ship(BOARD board, char name[], int size, int val);
 
 #endif //BATTLESHIP_BOARD_H

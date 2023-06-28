@@ -1,6 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
 
 #include <unistd.h>
 #include <printf.h>
@@ -35,7 +32,7 @@ SESSION start_session(int port) {
     // listening incoming connections with a buffer of three
     listen(session.socket_desc, 3);
 
-    printf("Serveur en place (port %i). En attente de client..\n", port);
+    printf(" @ Serveur en place (port %i). \n En attente de client..\n", port);
     session.c = sizeof(struct sockaddr_in);
 
     return session;
@@ -50,17 +47,15 @@ int incoming_message(SESSION session, BOARD *board) {
     // Incoming client accept
     session.client_sock = accept(session.socket_desc, (struct sockaddr *) &session.client, (socklen_t *) &session.c);
     if (session.client_sock < 0) {
-        perror("Connexion entrante refusee");
+        perror(" ! Connexion entrante refusee");
         return 1;
     }
 
-
-    printf("\n-------------------------------------\n");
     printf("En attente du hit de l'adversaire..\n");
 
     // Reading message
     while ((session.read_size = recv(session.client_sock, session.client_message, 100, 0)) > 0) {
-        printf(ANSI_COLOR_BLUE " > %s\n\n" ANSI_COLOR_RESET, session.client_message);
+        printf(ANSI_COLOR_BLUE " => %s\n\n" ANSI_COLOR_RESET, session.client_message);
 
 
         hit = str_to_point(session.client_message, 0);
@@ -85,7 +80,7 @@ int incoming_message(SESSION session, BOARD *board) {
                     pv = (*board).battleship;
                     break;
                 case C_CRUISE:
-                    (*board).grid[hit.y][hit.x] = C_CRUISE;
+                    (*board).grid[hit.y][hit.x] = C_CRUISER_S;
                     (*board).cruiser--;
                     pv = (*board).cruiser;
                     break;
@@ -95,7 +90,7 @@ int incoming_message(SESSION session, BOARD *board) {
                     pv = (*board).submarine;
                     break;
                 case C_DESTROYER:
-                    (*board).grid[hit.y][hit.x] = C_DESTROYER_T;
+                    (*board).grid[hit.y][hit.x] = C_DESTROYER_S;
                     (*board).destroyer--;
                     pv = (*board).destroyer;
                     break;
@@ -111,12 +106,10 @@ int incoming_message(SESSION session, BOARD *board) {
         }
 
         printf("Résultat :\n");
-        printf("----------\n");
         display_board((*board).grid);
-        //		printf(">> %s\n", server_response);
         printf(ANSI_COLOR_BLUE "\nIl vous reste %i points..\n" ANSI_COLOR_RESET, get_board_score(*board));
         if (get_board_score(*board) == 0) {
-            printf(ANSI_COLOR_RED"..Vous n'avez plus de bateaux. Vous avez perdu. Mince. Dommage..\n"ANSI_COLOR_RESET);
+            printf(ANSI_COLOR_RED"..Vous avez perdu.\n"ANSI_COLOR_RESET);
             sprintf(server_response, "%d", S_LOST);
         }
         // Envoi d'une réponse au client
@@ -130,10 +123,10 @@ int incoming_message(SESSION session, BOARD *board) {
     }
 
     if (session.read_size == 0) {
-        puts("Déconnexion du client");
+        puts(" ! Déconnexion du client");
         fflush(stdout);
     } else if (session.read_size == -1) {
-        perror("Erreur lors de la réception");
+        perror(" ! Erreur lors de la réception");
     }
 
     return status;
@@ -145,11 +138,11 @@ int wait_handshake(SESSION session) {
     char resp[2 + 1];
     sprintf(resp, "%d", S_HANDSHAKE);
 
-    printf("En attente de l'autre joueur...\n");
+    printf(" # En attente de l'autre joueur...\n");
     // Acceptation de la connexion d'un client
     session.client_sock = accept(session.socket_desc, (struct sockaddr *) &session.client, (socklen_t *) &session.c);
     if (session.client_sock < 0) {
-        perror("Connexion entrante refusee");
+        perror(" ! Connexion entrante refusee");
         return 1;
     }
 
@@ -158,9 +151,11 @@ int wait_handshake(SESSION session) {
         content = strtol(session.client_message, NULL, 10);
         if (content == S_HANDSHAKE) {
             write(session.client_sock, resp, sizeof(int));
-            printf("Connecté à l'autre joueur...\n");
+            printf(" # Connecté à l'autre joueur...\n");
         }
     }
+
+    return 0;
 }
 
 /*

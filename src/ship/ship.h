@@ -1,7 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
-
 #ifndef BATTLESHIP_SHIP_H
 #define BATTLESHIP_SHIP_H
 

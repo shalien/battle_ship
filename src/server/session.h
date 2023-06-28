@@ -1,7 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
-
 #ifndef BATTLESHIP_SESSION_H
 #define BATTLESHIP_SESSION_H
 
@@ -11,12 +7,12 @@
 
 #define SRV_PORT 7890
 
-#define S_LOST -1 // Partie perdue
-#define S_HIT 1 // Bateau touché
-#define S_MISS 2 // Bateau manqué
-#define S_HIT_BIS 3 // Bateau touché
-#define S_SUNKEN 4 //Bateau coulé.
-#define S_HANDSHAKE 10 // Code de poignée de main
+#define S_LOST (-1)
+#define S_HIT 1
+#define S_MISS 2
+#define S_HIT_BIS 3
+#define S_SUNKEN 4
+#define S_HANDSHAKE 10
 
 
 typedef struct SESSION {

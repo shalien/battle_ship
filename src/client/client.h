@@ -1,6 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
 
 #ifndef BATTLESHIP_CLIENT_H
 #define BATTLESHIP_CLIENT_H

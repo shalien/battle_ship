@@ -1,7 +1,3 @@
-//
-// Created by Ophélien DUPARC on 14/06/2023.
-//
-
 #ifndef BATTLESHIP_CONSOLE_COLORS_H
 #define BATTLESHIP_CONSOLE_COLORS_H
 
